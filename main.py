@@ -42,6 +42,12 @@ def start(log_path: str, webhook_url: str, illegal_keywords: list[str]) -> None:
     p = select.poll()
     p.register(f.stdout)
 
+    print(f"====Started MTALogBot====\
+        \nLog filepath: {log_path}\
+        \nWebhook URL: {webhook_url}\
+        \nKeywords given: {len(illegal_keywords)}\
+        \n=========================")
+
     while True:
         if p.poll(1):
             try:
