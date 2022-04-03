@@ -3,7 +3,6 @@ Relay MTA:SA server logs into discord via webhooks
 
 ## Features
 - [x] Simple CLI interface
-- [x] Non-blocking
 - [x] Mask static keywords such as serials, secrets etc
 
 ## Setup
