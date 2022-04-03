@@ -7,7 +7,7 @@ Relay MTA:SA server logs into discord via webhooks
 
 ## Setup
 ### Clone repository
-`git clone ...`
+`git clone https://github.com/ricksterhd123/MTALogBot.git`
 
 ### Change directory
 `cd MTALogBot`
