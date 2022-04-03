@@ -1,9 +1,16 @@
+import platform
 import requests
-import time
 import subprocess
-import select
 import re
 import argparse
+
+
+def get_tail_cmd(system, log_path):
+    tail_cmd = {
+        'Windows': f"powershell.exe \"Get-Content '{log_path}' -Tail 0 -Wait\"",
+        'Linux': ['tail', '-0f', log_path]
+    }
+    return tail_cmd[system]
 
 
 def send_discord_message(webhook_url: str, message: str) -> None:
@@ -26,7 +33,9 @@ def filter_log_message(illegal_keywords: list[str], message: str) -> str:
     :param message: Message contents to get filtered
     :returns: resulting message after filtration
     """
+    # Remove hex colour tags e.g. #FF0000
     message = re.sub("#(?:[0-9a-fA-F]{3}){1,2}", "", message)
+    # Mask illegal keywords
     for hidden_static_str in illegal_keywords:
         masked_str = "#" * len(hidden_static_str)
         message = re.sub(hidden_static_str, masked_str, message)
@@ -37,10 +46,9 @@ def start(log_path: str, webhook_url: str, illegal_keywords: list[str]) -> None:
     """
     Start watching log file and post updates to webhook url
     """
-    f = subprocess.Popen(['tail', '-0f', log_path],
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    p = select.poll()
-    p.register(f.stdout)
+    cmd = get_tail_cmd(platform.system(), log_path)
+    print(cmd)
+    f = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     print(f"====Started MTALogBot====\
         \nLog filepath: {log_path}\
@@ -49,18 +57,17 @@ def start(log_path: str, webhook_url: str, illegal_keywords: list[str]) -> None:
         \n=========================")
 
     while True:
-        if p.poll(1):
-            try:
+        try:
+            message = f.stdout.readline().decode("utf-8")
+            if message:
                 log_message = filter_log_message(
-                    illegal_keywords, f.stdout.readline().decode("utf-8"))
+                    illegal_keywords, message)
                 send_discord_message(webhook_url, log_message)
-            except Exception as e:
-                print(e)
-            finally:
-                # clean up here
-                pass
-
-        time.sleep(1)
+        except Exception as e:
+            print(e)
+        finally:
+            # clean up here
+            pass
 
 
 if __name__ == '__main__':
