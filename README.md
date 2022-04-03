@@ -16,7 +16,10 @@ Relay MTA:SA server logs into discord via webhooks
 `python3 -m venv ./venv`
 
 ### Activate venv
+#### Linux
 `source ./venv/bin/activate`
+#### Windows
+`.\venv\Scripts\activate`
 
 ### Install required dependencies
 `pip install -r requirements.txt`
